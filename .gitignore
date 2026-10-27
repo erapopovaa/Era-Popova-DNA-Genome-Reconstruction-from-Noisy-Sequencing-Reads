@@ -1,0 +1,21 @@
+# IDE
+.idea/
+.vs/
+.vscode/
+*.iml
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Të dhëna të mëdha
+data/reads/*.fastq
+data/reads/*.fastq.gz
+data/reads/*.sra
+data/raw/
+
+# Rezultate të ndërmjetme
+results/tmp/
+*.log
