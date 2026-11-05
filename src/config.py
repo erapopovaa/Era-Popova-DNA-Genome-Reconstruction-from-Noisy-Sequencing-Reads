@@ -15,3 +15,7 @@ SEED = 42
 # Alinjimi
 MAX_ERR = 0.05     # error rate maksimal i lejuar në overlap
 ALIGN_BAND = 8     # gjerësia e brezit të programimit dinamik
+
+
+# Grafi
+FUZZ = 10          # toleranca (baza) për transitive reduction
