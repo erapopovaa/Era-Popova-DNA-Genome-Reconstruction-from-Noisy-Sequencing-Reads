@@ -11,3 +11,7 @@ MIN_OVERLAP = 40   # gjatësia minimale e overlap-it
 COVERAGE = 30
 ERROR_RATE = 0.01
 SEED = 42
+
+# Alinjimi
+MAX_ERR = 0.05     # error rate maksimal i lejuar në overlap
+ALIGN_BAND = 8     # gjerësia e brezit të programimit dinamik
