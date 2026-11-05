@@ -57,3 +57,31 @@ def overlap_precision(reads, overlaps, min_overlap):
     checked = [(o["a"], o["b"]) for o in overlaps if o["a"] in info and o["b"] in info]
     ok = sum(1 for p in checked if p in true_loose)
     return ok / len(checked) if checked else 0.0
+
+
+
+def graph_edge_accuracy(reads, graph):
+    """Sa nga skajet e grafit janë gjeometrikisht të sakta sipas pozicioneve nga simulatori:
+    të dy nyjet në të njëjtin orientim, drejtimi përgjatë gjenomit i duhur, dhe reads mbivendosen."""
+    info = _read_info(reads)
+    total = ok = 0
+    for u, outs in graph.items():
+        ru, su = u >> 1, u & 1
+        if ru not in info:
+            continue
+        s_u, l_u, st_u = info[ru]
+        fwd_u = (st_u == "+") != (su == 1)
+        for v in outs:
+            rv, sv = v >> 1, v & 1
+            if rv not in info:
+                continue
+            s_v, l_v, st_v = info[rv]
+            fwd_v = (st_v == "+") != (sv == 1)
+            total += 1
+            if fwd_u != fwd_v:
+                continue
+            direction_ok = s_v > s_u if fwd_u else s_v < s_u
+            overlap_ok = s_v < s_u + l_u and s_u < s_v + l_v
+            if direction_ok and overlap_ok:
+                ok += 1
+    return ok / total if total else 0.0
