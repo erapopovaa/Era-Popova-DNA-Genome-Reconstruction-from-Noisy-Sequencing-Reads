@@ -47,3 +47,13 @@ def candidate_quality(reads, candidates, min_overlap, recall_overlap=60):
         "true_overlaps_strict": len(true_strict),
         "orientation_accuracy": orient_ok / correct if correct else 0.0,
     }
+
+
+
+def overlap_precision(reads, overlaps, min_overlap):
+    """Sa nga overlap-et e pranuara janë të vërteta (sipas pozicioneve nga simulatori)."""
+    info = _read_info(reads)
+    true_loose = _true_pairs(info, min_overlap)
+    checked = [(o["a"], o["b"]) for o in overlaps if o["a"] in info and o["b"] in info]
+    ok = sum(1 for p in checked if p in true_loose)
+    return ok / len(checked) if checked else 0.0
