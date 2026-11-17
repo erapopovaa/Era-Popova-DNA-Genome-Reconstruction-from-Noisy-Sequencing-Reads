@@ -1,3 +1,5 @@
+import gzip
+
 """Funksione për lexim/shkrim të FASTA dhe FASTQ, dhe reverse-complement."""
 
 _COMPLEMENT = str.maketrans("ACGTNacgtn", "TGCANtgcan")
@@ -40,10 +42,11 @@ def write_fasta(path, records, width=70):
 
 
 def read_fastq(path, max_reads=None):
-    """Gjenerator: jep (emri, sekuenca, quality) për çdo read.
+    """Gjenerator: jep (emri, sekuenca, quality) për çdo read. Pranon edhe .gz.
     quality është listë numrash Phred (Q-score)."""
+    opener = gzip.open if path.endswith(".gz") else open
     count = 0
-    with open(path, "r") as f:
+    with opener(path, "rt") as f:
         while True:
             header = f.readline()
             if not header:
