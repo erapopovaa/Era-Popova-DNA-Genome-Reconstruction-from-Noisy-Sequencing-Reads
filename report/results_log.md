@@ -88,3 +88,23 @@ Shënim: komponentet rriten sepse reads të hequra nga tips/bubbles mbeten si un
 Vërejtje: edit distance matet mbi contigs me gjatësi të ndryshme (5357 kundrejt 1436), ndaj identiteti është krahasimi i drejtë.
 Përfundim: OLC prodhon një contig të vetëm 3.7 herë më të gjatë se i pari i greedy, me N50 7 herë më të madh. Greedy e fragmenton gjenomin sepse pranon skaje vetëm sipas peshës, pa e parë strukturën e grafit.
 Identiteti 97.7% para konsensusit është gabimi i grumbulluar i reads të veçanta; java 6 e korrigjon.
+
+## Konsensusi dhe variantet, phiX174 simuluar (seed=42, 30x, 1% gabim)
+
+Parametrat: polish_rounds=2, polish_band=10, min_alt=3, min_alt_frac=0.25, seq_error=0.01, pvalue_max=1e-6
+
+| Metrika | Vlera |
+|---|---|
+| Edit distance para konsensusit | 98 |
+| Edit distance pas konsensusit | 0 |
+| Identiteti pas konsensusit | 100% |
+| Gjatësia e rindërtuar | 5,384 |
+| Reads të alinjuara | 1,292 / 1,292 (100%) |
+| Coverage mesatar | 29.9x |
+| Variante të raportuara | 17 (para bashkimit të indels) |
+| TP / FP / FN (para bashkimit) | 15 / 2 / 1 |
+| TP / FP / FN (pas bashkimit) | 16 / 0 / 0 |
+| Koha totale | 8.89 s |
+| Memoria maksimale | 80 MB |
+
+Shënim: FP/FN para bashkimit vijnë nga një insertion dy-bazësh (GC, pozicioni 1881) e raportuar si dy insertions një-bazëshe. Sekuenca e rindërtuar është 100% e saktë.

@@ -144,3 +144,67 @@ def contig_vs_reference(contig, ref, k=25, band=60):
                     "contig_length": len(seq),
                     "identity": 1 - ed / max(len(seq), len(seg))}
     return best
+
+
+
+def read_truth(path):
+    """Lexon mutacionet e njohura nga TSV (POS, TYPE, REF, ALT)."""
+    out = []
+    with open(path, "r") as f:
+        next(f)
+        for line in f:
+            p = line.rstrip("\n").split("\t")
+            if len(p) == 4:
+                out.append((int(p[0]), p[1], p[2], p[3]))
+    return out
+
+
+def compare_variants(called, truth, tol=3):
+    """Krahason variantet e gjetura me të vërtetat. SNP: pozicion dhe bazë të njëjta.
+    INS/DEL: pozicion brenda +-tol (indels në rajone me përsëritje zhvendosen) dhe gjatësi e njëjtë."""
+    used = set()
+    missed = []
+    tp = 0
+    for t in truth:
+        tpos, tt, tref, talt = t
+        hit = None
+        for idx, c in enumerate(called):
+            if idx in used or c[1] != tt:
+                continue
+            cpos, _, cref, calt = c[:4]
+            if tt == "SNP":
+                ok = cpos == tpos and calt == talt
+            elif tt == "INS":
+                ok = abs(cpos - tpos) <= tol and len(calt) == len(talt)
+            else:
+                ok = abs(cpos - tpos) <= tol and len(cref) == len(tref)
+            if ok:
+                hit = idx
+                break
+        if hit is None:
+            missed.append(t)
+        else:
+            used.add(hit)
+            tp += 1
+    false_pos = [c for i, c in enumerate(called) if i not in used]
+    return {"tp": tp, "fp": len(false_pos), "fn": len(missed),
+            "missed": missed, "false_positives": false_pos}
+
+
+
+def merge_adjacent_indels(called, gap=2):
+    """Bashkon insertions (ose deletions) të njëpasnjëshme afër njëri-tjetrit në një variant të vetëm."""
+    merged = []
+    for v in sorted(called):
+        if merged:
+            p = merged[-1]
+            if p[1] == v[1] and v[1] in ("INS", "DEL") and v[0] - p[0] <= gap:
+                if v[1] == "INS":
+                    merged[-1] = (p[0], "INS", "-", p[3] + v[3],
+                                  min(p[4], v[4]), p[5], max(p[6], v[6]))
+                else:
+                    merged[-1] = (p[0], "DEL", p[2] + v[2], "-",
+                                  min(p[4], v[4]), p[5], max(p[6], v[6]))
+                continue
+        merged.append(v)
+    return merged

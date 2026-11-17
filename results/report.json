@@ -1,0 +1,18 @@
+{
+  "reads_total": 1292,
+  "reads_aligned_to_reconstruction": 1292,
+  "pct_reads_incorporated": 100.0,
+  "brute_force_comparisons": 833986,
+  "candidate_comparisons": 26555,
+  "overlaps_identified": 24998,
+  "avg_overlap_quality": 0.9819,
+  "reconstruction_length": 5384,
+  "edit_distance_vs_true_genome": 0,
+  "identity_vs_true_genome": 1.0,
+  "variants_called": 16,
+  "true_positives": 16,
+  "false_positives": 0,
+  "false_negatives": 0,
+  "time_seconds": 15.22,
+  "peak_memory_mb": 79.9
+}
