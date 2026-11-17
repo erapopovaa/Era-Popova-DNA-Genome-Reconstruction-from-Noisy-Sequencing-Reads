@@ -54,3 +54,37 @@ Parametrat: fuzz=10
 | Nyje me degëzim | 31 |
 | Nyje pa dalje | 5 |
 | Komponente të lidhura | 1 |
+
+## Rindërtimi OLC kundrejt greedy, phiX174 simuluar (seed=42, 30x, 1% gabim)
+
+Parametrat: tip_reads=4, bubble_len=6, simplify_rounds=5, fuzz=10
+
+### Thjeshtimi i grafit
+
+| Metrika | Para | Pas |
+|---|---|---|
+| Skaje | 902 | 832 |
+| Nyje me degëzim | 31 | 0 |
+| Nyje pa dalje | 5 | 40 |
+| Komponente | 1 | 20 |
+
+Tips të hequra: 3 | Bubbles të hequra: 16
+
+Shënim: komponentet rriten sepse reads të hequra nga tips/bubbles mbeten si unitigs të vetme (~140 baza). Ato janë kopje të tepërta dhe përdoren te konsensusi.
+
+### Krahasimi i metodave
+
+| Metrika | OLC | Greedy |
+|---|---|---|
+| Koha | 0.008 s | 0.005 s |
+| Contigs | 20 | 19 |
+| Gjatësia totale | 7,794 | 7,739 |
+| Contig-u më i gjatë | 5,357 | 1,436 |
+| N50 | 5,357 | 757 |
+| Mbulimi i gjenomit nga contig-u kryesor | 99.4% | 26.7% |
+| Edit distance (contig-u kryesor) | 125 | 33 |
+| Identiteti (contig-u kryesor) | 0.9767 | 0.9770 |
+
+Vërejtje: edit distance matet mbi contigs me gjatësi të ndryshme (5357 kundrejt 1436), ndaj identiteti është krahasimi i drejtë.
+Përfundim: OLC prodhon një contig të vetëm 3.7 herë më të gjatë se i pari i greedy, me N50 7 herë më të madh. Greedy e fragmenton gjenomin sepse pranon skaje vetëm sipas peshës, pa e parë strukturën e grafit.
+Identiteti 97.7% para konsensusit është gabimi i grumbulluar i reads të veçanta; java 6 e korrigjon.

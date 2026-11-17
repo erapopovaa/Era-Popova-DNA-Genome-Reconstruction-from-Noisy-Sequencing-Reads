@@ -85,3 +85,62 @@ def graph_edge_accuracy(reads, graph):
             if direction_ok and overlap_ok:
                 ok += 1
     return ok / total if total else 0.0
+
+
+
+def _global_edit_distance(x, y, w=60):
+    """Edit distance global në brez |i-j| <= w. None nëse gjatësitë ndryshojnë më shumë se w."""
+    INF = 10 ** 9
+    n, m = len(x), len(y)
+    if abs(n - m) > w:
+        return None
+    width = 2 * w + 1
+    prev = [INF] * width
+    for k in range(width):
+        j = k - w
+        if 0 <= j <= m:
+            prev[k] = j
+    for i in range(1, n + 1):
+        cur = [INF] * width
+        xi = x[i - 1]
+        for k in range(width):
+            j = i + k - w
+            if j < 0 or j > m:
+                continue
+            v = INF
+            if j >= 1:
+                v = prev[k] + (0 if xi == y[j - 1] else 1)
+            if k + 1 < width and prev[k + 1] + 1 < v:
+                v = prev[k + 1] + 1
+            if k >= 1 and cur[k - 1] + 1 < v:
+                v = cur[k - 1] + 1
+            cur[k] = v
+        prev = cur
+    k = m - n + w
+    return prev[k] if 0 <= k < width and prev[k] < INF else None
+
+
+def contig_vs_reference(contig, ref, k=25, band=60):
+    """Vendos contig-un në referencë (provon të dy strand-et), pastaj llogarit edit distance.
+    Kthen fjalor ose None nëse nuk gjendet pozicioni."""
+    from src.io_utils import reverse_complement
+    best = None
+    for strand, seq in (("+", contig), ("-", reverse_complement(contig))):
+        off = None
+        for s in range(0, max(1, min(len(seq) - k, 600)), 20):
+            idx = ref.find(seq[s:s + k])
+            if idx != -1:
+                off = idx - s
+                break
+        if off is None:
+            continue
+        off = max(0, off)
+        seg = ref[off:off + len(seq)]
+        ed = _global_edit_distance(seq, seg, band)
+        if ed is None:
+            continue
+        if best is None or ed < best["edit_distance"]:
+            best = {"edit_distance": ed, "strand": strand, "offset": off,
+                    "contig_length": len(seq),
+                    "identity": 1 - ed / max(len(seq), len(seg))}
+    return best
