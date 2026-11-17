@@ -1,0 +1,5 @@
+param,reads_total,candidate_comparisons,brute_force_comparisons,overlaps_identified,longest_contig,reconstruction_length,identity,genome_fraction,edit_distance,pct_reads_incorporated,tp,fp,fn,time_seconds,peak_memory_mb
+0.001,1292,27363,833986,27358,5378,5381,1.0,0.9989,0,100.0,16,0,0,5.17,137.7
+0.01,1292,26555,833986,24998,5357,5384,1.0,0.9994,0,100.0,16,0,0,8.48,137.7
+0.02,1292,26497,833986,25115,5335,5373,0.99981,0.9974,1,100.0,16,0,0,11.96,137.7
+0.05,1292,22683,833986,22662,3679,3735,1.0,0.6933,0,69.2,11,0,5,11.83,137.7
