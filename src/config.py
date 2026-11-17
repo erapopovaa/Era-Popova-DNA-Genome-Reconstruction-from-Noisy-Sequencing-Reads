@@ -25,3 +25,12 @@ FUZZ = 10          # toleranca (baza) për transitive reduction
 TIP_READS = 4        # tips me më së shumti kaq reads hiqen
 BUBBLE_LEN = 6       # gjatësia maksimale (në reads) e një rruge bubble
 SIMPLIFY_ROUNDS = 5  # raunde maksimale tips + bubbles
+
+
+# Konsensus dhe variante
+POLISH_ROUNDS = 2    # raunde korrigjimi
+POLISH_BAND = 10     # brezi i alinjimit read -> contig
+MIN_ALT = 3          # reads minimale që mbështesin një variant
+MIN_ALT_FRAC = 0.25  # pjesa minimale e reads që mbështesin variantin
+SEQ_ERROR = 0.01     # shkalla e pritur e gabimit të sekuencimit
+PVALUE_MAX = 1e-6    # p-value maksimale binomiale
