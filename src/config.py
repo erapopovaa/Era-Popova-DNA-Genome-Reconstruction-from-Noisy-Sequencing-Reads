@@ -19,3 +19,9 @@ ALIGN_BAND = 8     # gjerësia e brezit të programimit dinamik
 
 # Grafi
 FUZZ = 10          # toleranca (baza) për transitive reduction
+
+
+# Rindërtimi
+TIP_READS = 4        # tips me më së shumti kaq reads hiqen
+BUBBLE_LEN = 6       # gjatësia maksimale (në reads) e një rruge bubble
+SIMPLIFY_ROUNDS = 5  # raunde maksimale tips + bubbles
