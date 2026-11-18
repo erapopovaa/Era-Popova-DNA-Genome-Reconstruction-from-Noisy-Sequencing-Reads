@@ -1,5 +1,5 @@
 param,reads_total,candidate_comparisons,brute_force_comparisons,overlaps_identified,longest_contig,reconstruction_length,identity,genome_fraction,edit_distance,pct_reads_incorporated,tp,fp,fn,time_seconds,peak_memory_mb
-OLC i plotï¿½,1292,26555,833986,24998,5357,5384,1.0,0.9994,0,100.0,16,0,0,8.4,128.0
-pa transitive reduction,1292,26555,833986,24998,151,150,1.0,0.0278,0,3.79,0,0,16,4.19,128.5
-pa quality scores,1292,26555,833986,24998,5357,5384,1.0,0.9994,0,100.0,16,0,0,7.9,129.0
-greedy (baseline),1292,26555,833986,24998,1436,1443,1.0,0.2679,0,28.56,6,0,10,5.11,129.0
+OLC i plotë,1292,26555,833986,26428,5357,5384,1.0,0.9994,0,100.0,16,0,0,7.73,128.7
+pa transitive reduction,1292,26555,833986,26428,151,150,1.0,0.0278,0,3.79,0,0,16,4.13,129.1
+pa quality scores,1292,26555,833986,26428,5357,5384,1.0,0.9994,0,100.0,16,0,0,7.75,129.4
+greedy (baseline),1292,26555,833986,26428,5357,5384,1.0,0.9994,0,100.0,16,0,0,7.76,129.5
