@@ -13,7 +13,7 @@ ERROR_RATE = 0.01
 SEED = 42
 
 # Alinjimi
-MAX_ERR = 0.05     # error rate maksimal i lejuar në overlap
+MAX_ERR = 0.08     # error rate maksimal i lejuar në overlap
 ALIGN_BAND = 8     # gjerësia e brezit të programimit dinamik
 
 
@@ -23,7 +23,7 @@ FUZZ = 10          # toleranca (baza) për transitive reduction
 
 # Rindërtimi
 TIP_READS = 4        # tips me më së shumti kaq reads hiqen
-BUBBLE_LEN = 6       # gjatësia maksimale (në reads) e një rruge bubble
+BUBBLE_LEN = 15       # gjatësia maksimale (në reads) e një rruge bubble
 SIMPLIFY_ROUNDS = 5  # raunde maksimale tips + bubbles
 
 
