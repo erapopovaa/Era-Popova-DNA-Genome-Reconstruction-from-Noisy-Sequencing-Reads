@@ -178,12 +178,17 @@ Interpretim: rindërtimi është i plotë që nga 10x. Rezultatet e vjetra jo-mo
 | 4,999 | 20.8 kb | 12,492,501 | 102,703 | 122x | 30.7 s | 311 MB | 0.9996 | 67 / 0 / 0 |
 | 10,001 | 41.7 kb | 50,005,000 | 204,915 | 244x | 63.2 s | 553 MB | 0.9996 | 133 / 8 / 4 |
 | 20,002 | 83.3 kb | 200,030,001 | 409,820 | 488x | 132.5 s | 1,034 MB | 0.9998 | 271 / 8 / 5 |
+| 49,994 | 208.3 kb | 1,249,675,021 | 1,028,843 | 1,215x | 326.2 s | 2,463 MB | 1.0000 | 671 / 43 / 23 |
 
-Interpretim: kandidatët rriten afërsisht lineare (rreth 20 për read), brute force rritet me N². Koha dhe memoria rriten afërsisht lineare. Rindërtimi mbetet i plotë (genome fraction mbi 0.998) deri te 20k reads.
+Interpretim: kandidatët rriten afërsisht lineare (rreth 20 për read), ndërsa brute force rritet me N² (1.25 miliardë çifte te 50k kundrejt 1.03 milion kandidatësh). Koha (rreth 6.5 ms për read) dhe memoria (rreth 49 KB për read) rriten afërsisht lineare deri te 50k reads. Rindërtimi mbetet i plotë (genome fraction 1.0, edit distance 0 te 50k).
+
+Rreshti 50k është ekzekutuar me `experiments/scale_big.py` (të dhënat: `results/benchmark_scale_big.csv`), me të njëjtin gjenerim të rastësishëm (seed 42) dhe ~1 mutacion për 300 bp (694 variante të vërteta). Contig-u më i gjatë është 207,406 bp (7 contig-e gjithsej); pas polish gjatësia është 208,302 bp. Arsyeja e rritjes nga contig-u në konsensus nuk është verifikuar.
 
 ### Kufizime të njohura
 
-- **8 FP** te 10k dhe 20k reads (rreth 3% e varianteve) dhe 4-5 FN. Shkaku nuk është verifikuar.
+- **FP rriten me madhësinë:** 8 FP te 10k dhe 20k reads, 43 FP te 50k (rreth 6% e varianteve të raportuara), me 23 FN (recall 96.7%). Shkaku nuk është verifikuar; hipoteza (e pa provuar) është se pozicionet me gabime të grumbulluara kalojnë pragun statistikor kur gjenomi rritet.
+- **Shkallëzimi:** i matur deri në 50k reads (326 s, 2.46 GB, Python i pastër). 100k+ nuk është provuar; ekstrapolimi linear jep rreth 11 minuta dhe 5 GB, por është vetëm hipotezë.
+- **Memoria** ~49 KB për read është e lartë; nuk është profilizuar, ndaj shkaku (p.sh. struktura fjalorësh për overlap-et) është hipotezë.
 - **K=31** dëmton rindërtimin (genome fraction 0.59).
 - **Gabimi 5%** jep genome fraction 0.69.
 - **Repeats:** testuar te seksionet e fundit (gjenom sintetik, repeat me 3 kopje identike). Rezultatet varen nga gjatësia e reads kundrejt repeat-it.
