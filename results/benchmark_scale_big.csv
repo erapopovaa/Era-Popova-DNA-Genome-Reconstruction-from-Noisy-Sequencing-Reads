@@ -1,0 +1,2 @@
+n_reads,genome_bp,method,reads_total,brute_force_comparisons,candidate_comparisons,overlaps_identified,avg_overlap_quality,contigs,longest_contig,contig_strand,reconstruction_length,edit_distance,identity,genome_fraction,reads_aligned,pct_reads_incorporated,mean_coverage,variants_called,tp,fp,fn,time_seconds,peak_memory_mb
+49994,208333,olc,49994,1249675021,1028843,1023568,0.9797,7,207406,+,208302,0,1.0,1.0,49994,100.0,30.0,714,671,43,23,326.15,2462.6
