@@ -10,7 +10,7 @@ from experiments.benchmark import run
 GENOME_LEN = 10000
 REPEAT_LENS = [0, 80, 300, 1000]
 SEEDS = [42, 43, 44]
-METHODS = ["olc", "greedy"]
+METHODS = ["olc", "olc_best", "greedy"]
 
 
 def make_genome(repeat_len, seed):
