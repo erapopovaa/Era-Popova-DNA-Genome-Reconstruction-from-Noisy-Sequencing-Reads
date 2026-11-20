@@ -173,3 +173,41 @@ def contig_stats(contigs):
         "n50": n50,
         "reads_in_contigs": sum(len(p) for p, _ in contigs),
     }
+
+def resolve_branches(graph):
+    """Best-overlap në dy kalime (që filtrat të mos bien ndesh):
+    1) çdo nyje me disa dalje mban vetëm daljen me score më të lartë;
+    2) mes skajeve që mbetën, çdo nyje me disa hyrje mban vetëm hyrjen
+       me score më të lartë.
+    Pas kësaj, çdo nyje ka maksimumi 1 hyrje dhe 1 dalje.
+    Kthen numrin e skajeve të hequra."""
+    removed = 0
+
+    # Kalimi 1: best out
+    for u in list(graph):
+        outs = graph[u]
+        if len(outs) > 1:
+            keep = max(outs, key=lambda v: (outs[v][1], -v))
+            for v in [x for x in outs if x != keep]:
+                _remove_edge(graph, u, v)
+                removed += 1
+
+    # Kalimi 2: best in, vetëm mbi skajet që mbijetuan
+    best_in = {}
+    for u, outs in graph.items():
+        for v, e in outs.items():
+            key = (e[1], -u)
+            if v not in best_in or key > best_in[v][0]:
+                best_in[v] = (key, u)
+
+    to_remove = []
+    for u, outs in graph.items():
+        for v in outs:
+            if best_in[v][1] != u:
+                to_remove.append((u, v))
+
+    for u, v in to_remove:
+        if v in graph.get(u, {}):
+            _remove_edge(graph, u, v)
+            removed += 1
+    return removed

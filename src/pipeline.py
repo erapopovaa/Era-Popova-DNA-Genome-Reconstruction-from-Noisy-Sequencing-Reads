@@ -8,7 +8,7 @@ from src import config as C
 from src.kmer_index import build_index, find_candidates
 from src.overlap import compute_overlaps
 from src.graph import find_contained, build_graph, transitive_reduction
-from src.assemble import simplify, build_contigs
+from src.assemble import simplify, build_contigs, resolve_branches
 from src.greedy import greedy_contigs
 from src.consensus import polish, orient_contig, call_variants, edit_vs_reference
 from src.evaluate import compare_variants, merge_adjacent_indels
@@ -38,6 +38,8 @@ def run_pipeline(reads, ref, mutated=None, truth=None, k=C.K,
     else:
         if reduce_graph:
             transitive_reduction(graph, lens, fuzz=fuzz)
+        if method == "olc_best":
+            resolve_branches(graph)
         simplify(graph, active, C.TIP_READS, C.BUBBLE_LEN, C.SIMPLIFY_ROUNDS)
         contigs = build_contigs(reads, graph, active)
 
