@@ -208,3 +208,86 @@ def merge_adjacent_indels(called, gap=2):
                 continue
         merged.append(v)
     return merged
+
+def place_contig(contig, ref, k=25, n_anchors=5, band=60):
+    """Vendos contig-un në referencë duke provuar të gjitha ndodhjet e disa anchor-eve
+    (kështu contig-et brenda repeat-eve nuk ngatërrohen me kopjen e parë).
+    Kthen {"edit_distance", "strand", "offset", "length", "identity"} ose None."""
+    from src.io_utils import reverse_complement
+    best = None
+    for strand, seq in (("+", contig), ("-", reverse_complement(contig))):
+        n = len(seq)
+        if n < k:
+            continue
+        span = n - k
+        starts = sorted({int(i * span / (n_anchors - 1)) for i in range(n_anchors)})
+        offs = []
+        for s in starts:
+            anchor = seq[s:s + k]
+            pos, count = ref.find(anchor), 0
+            while pos != -1 and count < 10:
+                offs.append(pos - s)
+                pos = ref.find(anchor, pos + 1)
+                count += 1
+        if not offs:
+            continue
+        offs.sort()
+        clusters, cur = [], [offs[0]]
+        for o in offs[1:]:
+            if o - cur[-1] > 30:
+                clusters.append(cur)
+                cur = [o]
+            else:
+                cur.append(o)
+        clusters.append(cur)
+        for cl in clusters:
+            off = max(0, cl[len(cl) // 2])
+            seg = ref[off:off + n]
+            ed = _global_edit_distance(seq, seg, band)
+            if ed is None:
+                continue
+            if best is None or ed < best["edit_distance"]:
+                best = {"edit_distance": ed, "strand": strand, "offset": off,
+                        "length": len(seg),
+                        "identity": 1 - ed / max(len(seq), len(seg))}
+    return best
+
+
+def _n50(lengths):
+    total = sum(lengths)
+    acc = 0
+    for x in sorted(lengths, reverse=True):
+        acc += x
+        if acc * 2 >= total:
+            return x
+    return 0
+
+
+def assembly_metrics(contigs, ref, min_identity=0.95):
+    """Metrika për të gjithë contig-et (jo vetëm më të gjatin).
+    contigs = listë tuple-sh ku elementi 1 është sekuenca.
+    Contig 'i saktë' = vendoset në ref me identitet >= min_identity nga fillimi në fund;
+    contig-et që nuk plotësojnë këtë (misassembly, kolapsim repeat-i, ose të pavendosura)
+    nuk numërohen te mbulimi."""
+    seqs = [c[1] for c in contigs]
+    intervals, correct_lens, bad = [], [], 0
+    for s in seqs:
+        p = place_contig(s, ref)
+        if p is not None and p["identity"] >= min_identity:
+            intervals.append((p["offset"], p["offset"] + p["length"]))
+            correct_lens.append(len(s))
+        else:
+            bad += 1
+    covered, last_end = 0, -1
+    for a, b in sorted(intervals):
+        a = max(a, last_end)
+        if b > a:
+            covered += b - a
+            last_end = b
+    return {
+        "n50": _n50([len(s) for s in seqs]),
+        "contigs_correct": len(correct_lens),
+        "contigs_bad": bad,
+        "covered_fraction": round(covered / len(ref), 4),
+        "na50": _n50(correct_lens) if correct_lens else 0,
+    }

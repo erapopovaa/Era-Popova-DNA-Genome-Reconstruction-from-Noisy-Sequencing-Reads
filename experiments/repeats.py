@@ -37,7 +37,7 @@ def main():
             for seed in SEEDS:
                 genome = make_genome(r_len, seed)
                 reads = simulate_reads(genome, coverage=30, error_rate=0.01, seed=seed)
-                rep = run(reads, genome, None, None, method=method)
+                rep = run(reads, genome, None, None, method=method, eval_contigs=True)
                 reps.append(rep)
                 print("R=%-5d %-7s seed=%d -> contigs=%s longest=%s fraction=%s error=%s"
                       % (r_len, method, seed, rep.get("contigs"), rep.get("longest_contig"),
@@ -50,10 +50,14 @@ def main():
                 "genome_fraction": round(mean([x.get("genome_fraction") for x in reps]), 4),
                 "edit_distance": round(mean([x.get("edit_distance") for x in reps]), 1),
                 "time_seconds": round(mean([x.get("time_seconds") for x in reps]), 1),
+                "covered_fraction": round(mean([x.get("covered_fraction") for x in reps]), 4),
+                "n50": round(mean([x.get("n50") for x in reps])),
+                "na50": round(mean([x.get("na50") for x in reps])),
+                "contigs_bad": round(mean([x.get("contigs_bad") for x in reps]), 1),
             })
 
     cols = ["repeat_len", "method", "contigs", "longest_contig", "genome_fraction",
-            "edit_distance", "time_seconds"]
+            "edit_distance", "time_seconds","covered_fraction", "n50", "na50", "contigs_bad"]
     with open("results/benchmark_repeats.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(cols)

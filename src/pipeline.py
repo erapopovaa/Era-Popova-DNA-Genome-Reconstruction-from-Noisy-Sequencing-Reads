@@ -11,13 +11,12 @@ from src.graph import find_contained, build_graph, transitive_reduction
 from src.assemble import simplify, build_contigs, resolve_branches
 from src.greedy import greedy_contigs
 from src.consensus import polish, orient_contig, call_variants, edit_vs_reference
-from src.evaluate import compare_variants, merge_adjacent_indels
-
+from src.evaluate import compare_variants, merge_adjacent_indels, assembly_metrics
 
 def run_pipeline(reads, ref, mutated=None, truth=None, k=C.K,
                  min_shared=C.MIN_SHARED, min_overlap=C.MIN_OVERLAP,
                  max_err=C.MAX_ERR, fuzz=C.FUZZ, reduce_graph=True,
-                 use_quality=True, method="olc"):
+                 use_quality=True, method="olc", eval_contigs=False):
     """Ekzekuton pipeline-in. ref = referenca origjinale; mutated = gjenomi i vërtetë
     (vetëm në simulim); truth = lista e mutacioneve të vërteta (vetëm në simulim).
     Kthen (report, konsensusi, variantet)."""
@@ -53,6 +52,9 @@ def run_pipeline(reads, ref, mutated=None, truth=None, k=C.K,
         "contigs": len(contigs),
         "longest_contig": len(contigs[0][1]) if contigs else 0,
     }
+    if eval_contigs and contigs:
+        report.update(assembly_metrics(contigs, mutated if mutated else ref))
+    
     if not contigs:
         report["error"] = "nuk u formua asnjë contig"
         return report, "", []
