@@ -134,7 +134,7 @@ Përfundim: me 1% gabim për bazë, overlap-et e vërteta kanë luhatje të rast
 | Pa quality scores | 5,357 | 0.9994 | 100% | 16 / 0 / 0 | 7.8 s |
 | Greedy (baseline) | 5,357 | 0.9994 | 100% | 16 / 0 / 0 | 7.8 s |
 
-Interpretim: transitive reduction është thelbësore (pa të vetëm 151 baza). Quality scores nuk ndryshojnë rezultatin në 30x. Greedy del njësoj si OLC në këtë gjenom. Me pragun e vjetër 0.05 greedy jepte vetëm 1436 baza dhe 6/16 mutacione, por kjo ishte pasojë e skajeve që mungonin, jo e algoritmit. Hipoteza e mundshme: phiX174 nuk ka repeats, ndaj grafi është pothuajse linear dhe greedy mjafton.Testuar me vone te seksioni Repeats.
+Interpretim: transitive reduction është thelbësore (pa të vetëm 151 baza). Quality scores nuk ndryshojnë rezultatin në 30x. Greedy del njësoj si OLC në këtë gjenom. Me pragun e vjetër 0.05 greedy jepte vetëm 1436 baza dhe 6/16 mutacione, por kjo ishte pasojë e skajeve që mungonin, jo e algoritmit. Hipoteza e mundshme: phiX174 nuk ka repeats, ndaj grafi është pothuajse linear dhe greedy mjafton.Testuar me vone te seksioni Repeats:me reads te gjata greedy dhe olc_best japin te njejtin rezultat,me reads te shkurtra olc eshte me i sakte
 
 ### Zgjedhja e k (30x, 1% gabim)
 
@@ -186,11 +186,8 @@ Interpretim: kandidatët rriten afërsisht lineare (rreth 20 për read), brute f
 - **8 FP** te 10k dhe 20k reads (rreth 3% e varianteve) dhe 4-5 FN. Shkaku nuk është verifikuar.
 - **K=31** dëmton rindërtimin (genome fraction 0.59).
 - **Gabimi 5%** jep genome fraction 0.69.
-- **Repeats:** e testuar te seksioni më poshtë (gjenom sintetik 10 kb). Asnjë metodë nuk e rindërton gjenomin kur repeat-i është më i gjatë se read-et; shkaku i këtij kufiri (gjatësia e read-eve) është hipotezë e pa provuar.
-- **Metrika e repeats** (`genome_fraction` = contig më i gjatë / gjenomi) shpërblen contig-e të gjata por të gabuara dhe ndëshkon contig-e të mbivendosura që mbulojnë gjenomin (shih seed 43).
-- Rezultatet janë nga një seed i vetëm (42).
-- `peak_memory_mb` ka kuptim vetëm te `scale`.
-- `identity` matet mbi pjesën e rindërtuar, ndaj lexohet bashkë me `genome_fraction`. 
+- **Repeats:** testuar te seksionet e fundit (gjenom sintetik, repeat me 3 kopje identike). Rezultatet varen nga gjatësia e reads kundrejt repeat-it.
+- Rezultatet e seksionit Java 7 janë nga një seed i vetëm (42); eksperimentet me repeats përdorin 3 deri 10 seed-a.
 
 ## Eksperimenti me repeats (gjenom i rastësishëm 10 kb, 30x, 1% gabim, 3 seed-a: 42, 43, 44)
 
@@ -239,3 +236,102 @@ Mesataret janë mbi 3 seed-a. Gjenom fraction për seed-in individual te R=0 / R
 - Metrika: contig më i gjatë / gjenomi; `pipeline` poliron vetëm `contigs[0]`. Mbulimi i bashkuar i të gjithë contig-eve ose N50 do të ishte më i drejtë.
 - `edit_distance` matet mbi contig-un e parë, ndaj nuk është i krahasueshëm mes rreshtave të fragmentuar.
 - `olc_best` i shkurtër te seed 43 (R=0 dhe R=80) është i njëjtë me greedy; pra te ky seed best-overlap dhe greedy kanë të njëjtin kufizim.
+
+## Eksperimentet me repeats (gjenom i rastësishëm 10 kb, 30x, 1% gabim)
+
+Gjenomi: 10,000 baza të rastësishme; segmenti 2000..2000+R kopjohet te pozicionet 5000 dhe 8000 (3 kopje identike gjithsej). Metodat:
+- `olc`: transitive reduction + simplify (tips dhe bubbles);
+- `olc_best`: `olc` + `resolve_branches` (best-overlap në dy kalime);
+- `greedy`: baseline.
+
+Skriptet: `experiments/repeats.py`, `experiments/read_length.py`, `experiments/repeats_seeds.py`. Të dhënat: `results/benchmark_repeats.csv`, `results/benchmark_readlen.csv`, `results/benchmark_repeats_seeds.csv`.
+
+### Metrikat
+
+- **covered_fraction:** pjesa e gjenomit e mbuluar nga bashkimi i të gjitha contig-eve që vendosen në referencë me identitet >= 0.95 (`assembly_metrics` te `src/evaluate.py`). Contig-et me identitet nën 0.95 (misassembly, repeat i kolapsuar, ose i pavendosur) nuk numërohen. Pragu 0.95 është zgjedhje e jona (contig-et e papoliruara kanë ~2% gabim), jo vlerë e matur. Një contig pjesërisht i saktë por me një misassembly hidhet i tëri, ndaj metrika mund të nënvlerësojë pak.
+- **contigs_bad:** numri i contig-eve që nuk plotësojnë kushtin e mësipërm.
+- **N50 / NA50:** N50 mbi të gjithë contig-et; NA50 vetëm mbi contig-et e sakta.
+- **genome_fraction** (contig më i gjatë / gjenomi) dhe **edit_distance** matin vetëm `contigs[0]`. Genome fraction shpërblen contig-e të gjata por të gabuara dhe ndëshkon rindërtime të ndara në contig-e që mbivendosen. Prandaj tabelat më poshtë nuk i përdorin dhe interpretimi bazohet te metrikat e mësipërme.
+- `time_seconds` ndryshon nga një ekzekutim te tjetri (p.sh. `olc` R=0: 24.3 s në një ekzekutim, 14.9 s te `olc_best`, ndërsa algoritmi është thelbësisht i njëjtë), ndaj nuk përdoret për të krahasuar metodat.
+
+### 1. Repeats, reads 100-150 bp, 3 seed-a (42, 43, 44)
+
+| R | Metoda | Contig-e | covered_fraction | N50 | NA50 | contigs_bad |
+|---|---|---|---|---|---|---|
+| 0 | olc | 1.3 | 0.9943 | 9943 | 9943 | 0.3 |
+| 0 | olc_best | 1.3 | 0.9951 | 9616 | 9616 | 0.0 |
+| 0 | greedy | 4.0 | 0.9950 | 9616 | 9616 | 0.0 |
+| 80 | olc | 11.3 | 0.9977 | 3053 | 3053 | 0.3 |
+| 80 | olc_best | 1.3 | 0.9951 | 9616 | 9616 | 0.0 |
+| 80 | greedy | 4.0 | 0.9950 | 9616 | 9616 | 0.0 |
+| 300 | olc | 6.7 | 0.9815 | 2898 | 2898 | 0.3 |
+| 300 | olc_best | 3.3 | 0.6961 | 2910 | 2644 | 0.7 |
+| 300 | greedy | 5.7 | 0.5460 | 2909 | 2643 | 1.0 |
+| 1000 | olc | 6.7 | 0.8419 | 2135 | 2170 | 0.3 |
+| 1000 | olc_best | 3.3 | 0.6699 | 4204 | 3163 | 0.3 |
+| 1000 | greedy | 6.7 | 0.7561 | 3240 | 3195 | 0.3 |
+
+Për R=300 me 10 seed-a, mesatarja e greedy del 0.66 (jo 0.55); me 3 seed-a mesataret janë të paqëndrueshme (shih tabelën 3).
+
+### 2. Gjatësia e reads, 3 seed-a (42, 43, 44)
+
+| R | Reads | Metoda | Contig-e | covered_fraction | N50 | NA50 | contigs_bad |
+|---|---|---|---|---|---|---|---|
+| 300 | 100-150 | olc | 6.7 | 0.9815 | 2898 | 2898 | 0.3 |
+| 300 | 100-150 | olc_best | 3.3 | 0.6961 | 2910 | 2644 | 0.7 |
+| 300 | 100-150 | greedy | 5.7 | 0.5460 | 2909 | 2643 | 1.0 |
+| 300 | 500-700 | olc | 7.3 | 0.9962 | 2248 | 2248 | 0.0 |
+| 300 | 500-700 | olc_best | 1.0 | 0.9936 | 9936 | 9936 | 0.0 |
+| 300 | 500-700 | greedy | 1.0 | 0.9936 | 9936 | 9936 | 0.0 |
+| 1000 | 100-150 | olc | 6.7 | 0.8419 | 2135 | 2170 | 0.3 |
+| 1000 | 100-150 | olc_best | 3.3 | 0.6699 | 4204 | 3163 | 0.3 |
+| 1000 | 100-150 | greedy | 6.7 | 0.7561 | 3240 | 3195 | 0.3 |
+| 1000 | 1200-1500 | olc | 10.0 | 0.9939 | 2267 | 2267 | 0.0 |
+| 1000 | 1200-1500 | olc_best | 1.0 | 0.9918 | 9918 | 9918 | 0.0 |
+| 1000 | 1200-1500 | greedy | 1.3 | 0.9919 | 9919 | 9919 | 0.0 |
+
+Koha e `olc_best` me reads 1200-1500 (183 s mesatarisht, kundrejt 50 s të greedy) është e pashpjeguar; nuk është diagnostikuar.
+
+### 3. Repeats, reads 100-150 bp, 10 seed-a (42 deri 51), mesatare ± devijim standard
+
+| R | Metoda | covered_fraction | contigs_bad | N50 | NA50 | Seed-a me covered >= 0.95 |
+|---|---|---|---|---|---|---|
+| 300 | olc | 0.9831 ± 0.0033 | 0.3 ± 0.48 | 2905 | 2905 | 10 / 10 |
+| 300 | olc_best | 0.6603 ± 0.1822 | 1.0 ± 0.67 | 2912 | 2563 | 2 / 10 |
+| 300 | greedy | 0.6611 ± 0.1836 | 1.0 ± 0.47 | 2914 | 2670 | 2 / 10 |
+| 1000 | olc | 0.8443 ± 0.0031 | 0.3 ± 0.48 | 2148 | 2159 | 0 / 10 |
+| 1000 | olc_best | 0.6703 ± 0.2280 | 0.6 ± 0.84 | 3706 | 3355 | 0 / 10 |
+| 1000 | greedy | 0.7404 ± 0.1743 | 0.5 ± 0.71 | 3418 | 3391 | 0 / 10 |
+
+### Çfarë është e provuar (sipas të dhënave më sipër)
+
+1. **Gjatësia e reads vendos nëse repeat-i zgjidhet.** Kur reads janë më të gjata se repeat-i plus flanqet (500-700 bp për R=300; 1200-1500 bp për R=1000), `olc_best` dhe greedy rindërtojnë gjenomin me 1 contig, mbulim 0.99+ dhe 0 contig të gabuar në të 3 seed-at. Me reads 100-150 bp asnjë metodë nuk e rindërton gjenomin kur R >= 300 (0/10 seed-a mbi 0.95 te R=1000).
+2. **Me reads më të shkurtra se repeat-i, `olc` është më i besueshëm se `olc_best` dhe greedy.** Te R=300 (10 seed-a): `olc` mbulim i saktë 0.983 ± 0.003 dhe 10/10 seed-a mbi 0.95; `olc_best` dhe greedy 0.66 ± 0.18 dhe vetëm 2/10. Dallimi është shumë më i madh se luhatja mes seed-ave. Rezultati i `olc_best` është dypjesësh (rreth 0.98 ose 0.50-0.68), ndaj mesatarja nuk e përfaqëson asnjë rast tipik.
+3. **Me reads të gjata, greedy dhe `olc_best` japin rezultate të njëjta.** Kjo ka kuptim: të dyja zgjedhin skajin me score më të lartë për çdo degëzim. `olc` është konservator: nuk e lidh repeat-in dhe mbetet i saktë (0 contig të gabuar, mbulim 0.99+), por i thyer (N50 rreth 2250).
+4. **Te R=1000 me reads të shkurtra nuk ka renditje të besueshme mes `olc_best` (0.67) dhe greedy (0.74):** devijimi standard (0.17-0.23) është më i madh se diferenca. Vetëm `olc` është i qëndrueshëm (0.844 ± 0.003).
+5. **R=80 (repeat më i shkurtër se reads):** `olc` jep 11 contig-e të sakta (mbulim 0.9977, N50 3053); `olc_best` dhe greedy japin 1 deri 4 contig-e të gjata. Reads e kalojnë repeat-in, ndaj best-overlap e lidh pa gabime (`contigs_bad` 0).
+6. **Gabim i vërtetë i gjetur dhe i rregulluar:** versioni i parë i `resolve_branches` llogariste best-in mbi grafin para se të hiqeshin skajet e best-out, dhe mund të linte një nyje pa hyrje. Testi `tests/test_resolve.py` e kap gabimin: versioni i vjetër heq skajin e vlefshëm (u->v), versioni me dy kalime e ruan (verifikuar duke ekzekutuar të dy versionet).
+
+### Seed 43, R=0: pse `genome_fraction` i `olc_best` ishte 0.9006 (diagnostikuar me `diagnose_best.py` dhe `diagnose_pair.py`)
+
+- `resolve_branches` hoqi vetëm 1 skaj nga 1608 (me binjakun, 2 në graf; grafi mbeti simetrik).
+- `olc_best` jep 2 contig-e që mbivendosen ~83 bp (afërsisht 3-8971 dhe 8888-9990): gjenomi mbulohet plotësisht (covered_fraction 0.9951, `contigs_bad` 0). Rënia 0.999 -> 0.9006 ishte artefakt i metrikës "contig më i gjatë".
+- Skaji i hequr (`read_13 -> read_1993`, overlap 112 bp) ishte i vërtetë. Humbi kundër `read_735 -> read_1993` (score 120 kundrejt 109).
+- Skaji `read_13 <-> read_735` mungon sepse alinjimi jep edit distance 12 në ~121 bp (raporti 0.099 > `MAX_ERR` 0.08). `read_735` ka 10 gabime në ~121 bp (~8%) kundrejt 1% të simuluar.
+- Përfundim: kufizim i best-overlap me një read shumë të zhurmshëm, jo bug.
+
+### Hipoteza të pa provuara
+
+- `olc_best` dhe greedy dështojnë te reads të shkurtra sepse zgjedhin një degë te repeat-i dhe e kolapsojnë; kjo përputhet me `contigs_bad` dhe covered_fraction, por nuk është verifikuar duke shqyrtuar vetë contig-et.
+- `olc` te R=0 ka `contigs_bad` 0.3 (kontig 137 bp i seed 43, që mendojmë se është `read_735`). Nuk është verifikuar.
+- Pse `simplify` e lë repeat-in të thyer ndërsa `resolve_branches` jo: nuk është diagnostikuar.
+- Pse `olc` te R=1000 arrin vetëm 0.84 mbulim (e kemi parë, por shkaku nuk është hetuar).
+- `MAX_OCC=100` te indeksi nuk është testuar drejtpërdrejt.
+
+### Kufizime të këtyre eksperimenteve
+
+- Gjenom sintetik i rastësishëm, 3 kopje identike të repeat-it (pa divergjencë, siç ka shpesh te gjenomet reale), pa regjione me kompleksitet të ulët.
+- Model i thjeshtë gabimi (1%, 90% zëvendësime); reads të simuluara, jo reale.
+- Tabelat 1 dhe 2: 3 seed-a (mesataret janë të zhurmshme, sidomos te R=1000); tabela 3: 10 seed-a vetëm për reads të shkurtra.
+- Pragu i identitetit 0.95 në `assembly_metrics` është zgjedhje e jona.
+- `edit_distance` dhe `genome_fraction` nga `benchmark_*.csv` mbeten të përfshira te skedarët CSV, por matin vetëm contig-un e parë dhe nuk duhen përdorur për krahasim.
